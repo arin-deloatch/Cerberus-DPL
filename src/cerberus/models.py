@@ -1,8 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import Optional, Literal, List, Dict
 from datetime import datetime
 
 SourceType = Literal["web", "graphql", "database", "cli"]
+
 
 class NormalizedDoc(BaseModel):
     source_type: SourceType
@@ -18,7 +19,7 @@ class NormalizedDoc(BaseModel):
     text: str
     raw: bytes
 
-    # Structure & links -- mostly for web data, but can be useful in other places 
+    # Structure & links -- mostly for web data, but can be useful in other places
     outlinks: List[str] = []
     backlinks: List[str] = []
     headings: List[str] = []

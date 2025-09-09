@@ -4,6 +4,7 @@ import logging
 import sys
 import structlog
 
+
 def configure_logging() -> None:
     logging.basicConfig(
         format="%(message)s",
@@ -22,7 +23,7 @@ def configure_logging() -> None:
         structlog.dev.ConsoleRenderer(colors=True),
     ]
 
-    # Config 
+    # Config
     structlog.configure(
         processors=processors,
         context_class=dict,
@@ -32,7 +33,6 @@ def configure_logging() -> None:
     )
 
 
-# Call at startup (bootstrap.py, CLI entrypoint, etc.)
 configure_logging()
 
 # Export a logger instance for convenience
