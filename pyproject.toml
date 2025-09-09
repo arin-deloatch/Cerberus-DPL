@@ -1,0 +1,13 @@
+[project]
+name = "cerberus"
+version = "0.1.0"
+description = "Cerberus is a lightweight pipeline for filtering, normalizing and ingesting documents into RAG systems."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "Apache 2.0"
+dependencies = [
+    "docling>=1.11.0",
+    "pydantic>=2.11.7",
+    "structlog>=25.4.0",
+    "typer>=0.17.4",
+]
