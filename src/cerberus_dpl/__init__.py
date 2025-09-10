@@ -10,12 +10,13 @@ from importlib.metadata import version
 
 from .models import NormalizedDoc
 
+
 __all__ = [
     "NormalizedDoc",
 ]
 
 try:
-    __version__ = version("cerberus")
+    __version__ = version("cerberus-dpl")
 except Exception:
     __version__ = "0.0.0"
 
