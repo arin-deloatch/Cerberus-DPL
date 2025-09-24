@@ -1,20 +1,46 @@
 import typer
+from pathlib import Path
+
 from cerberus_dpl.logging import logger
-from cerberus_dpl.seed.build import build_seed_model
+from cerberus_dpl.seed.bertopic_model import train_bertopic_model
 from cerberus_dpl.config import settings
 
 app = typer.Typer(help="Cerberus")
 
+
 @app.command()
 def build_seed(
-    seed_input: str = typer.Argument(..., help="Path to seed folder (txt/md/html)"),
-    output: str = typer.Option(None, "--output", "-o", help="Output folder for seed model (defaults to settings.SEED_MODEL_PATH)"),
-    model: str = typer.Option(None, "--model", "-m", help="Embedding model name (defaults to settings.EMBEDDING_MODEL)"),
-    n_centroids: int = typer.Option(1, "--n-centroids", "-k", min=1, help="Number of centroids (topics) to build"),
+    input_path: Path = typer.Argument(..., help="Path to seed folder (txt/md/html)"),
+    output: Path = typer.Option(
+        settings.SEED_MODEL_PATH,
+        "--output",
+        "-o",
+        help="Output folder for seed model (defaults to settings.SEED_MODEL_PATH)",
+    ),
+    model: str = typer.Option(
+        settings.EMBEDDING_MODEL,
+        "--model",
+        "-m",
+        help="Embedding model name (defaults to settings.EMBEDDING_MODEL)",
+    ),
+    min_cluster_size: int = typer.Option(
+        5,
+        "--min-cluster-size",
+        "-k",
+        min=1,
+        help="Minimum cluster size for HDBSCAN to build.",
+    ),
     random_state: int = typer.Option(42, "--random-state", help="Clustering RNG seed"),
 ):
-    out = build_seed_model(seed_input, output_dir=output, embedding_model_name=model, n_centroids=n_centroids, random_state=random_state)
-    logger.info("cli_build_seed_done", output=str(out), n_centroids=n_centroids)
+    out = train_bertopic_model(
+        input_path=input_path,
+        output_path=output,
+        embedding_model_name=model,
+        min_cluster_size=min_cluster_size,
+        random_state=random_state,
+    )
+    logger.info("cli_build_seed_done", output=str(out))
+
 
 def main():
     """
@@ -25,6 +51,7 @@ def main():
     """
 
     app()
+
 
 if __name__ == "__main__":
     main()

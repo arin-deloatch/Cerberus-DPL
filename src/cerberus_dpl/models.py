@@ -17,7 +17,6 @@ class NormalizedDoc(BaseModel):
     lang: Optional[str] = None
     title: Optional[str] = None
     text: str
-    raw: bytes
 
     # Structure & links -- mostly for web data, but can be useful in other places
     outlinks: List[str] = []

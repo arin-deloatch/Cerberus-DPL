@@ -8,10 +8,9 @@ Keep this tiny for now: one method, a few exceptions.
 from __future__ import annotations
 from typing import Protocol, runtime_checkable
 
-from ..models import NormalizedDoc  # Pydantic model you defined elsewhere
+from ..models import NormalizedDoc
 
 
-# Exceptions kept simple and explicit
 class AdapterError(Exception):
     """Generic adapter failure (parsing, unsupported content, etc.)."""
 
@@ -24,7 +23,6 @@ class TransientError(AdapterError):
     """Retryable issues (timeouts, 5xx)."""
 
 
-# Minimal protocol: one method, one name
 @runtime_checkable
 class Adapter(Protocol):
     name: str

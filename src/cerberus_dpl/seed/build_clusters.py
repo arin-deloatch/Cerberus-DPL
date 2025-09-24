@@ -27,31 +27,52 @@ SUPPORTED_TEXT_EXT = {".txt", ".md", ".markdown"}
 HTML_EXT = {".html", ".htm"}
 
 
-def _iter_seed_texts(input_path: Path) -> Iterable[Tuple[str, str]]:
-    """ """
-    if input_path.is_dir():
-        for path in sorted(input_path.rglob("*")):
-            if not path.is_file():
-                continue
-            suffix = path.suffix.lower()
-            if suffix in SUPPORTED_TEXT_EXT:
-                yield path.stem, path.read_text(encoding="utf-8", errors="ignore")
-            elif suffix in HTML_EXT:
-                try:
-                    tree = lhtml.fromstring(path.read_bytes())
-                    for element in tree.xpath("//script|//style"):
-                        parent = element.getparent()
-                        if parent is not None:
-                            parent.remove(element)
-                    text = (tree.text_content() or "").strip()
-                    if text:
-                        yield path.stem, text
-                except Exception:
-                    continue
-        return
+def _extract_text_content(path: Path) -> Optional[str]:
+    """Extract text content from a text file."""
+    return path.read_text(encoding="utf-8", errors="ignore")
 
-    raise ValueError(f"""Unsupported seed input: {input_path};
-                     Provide a directory of .txt, .md or .html files.""")
+
+def _extract_html_content(path: Path) -> Optional[str]:
+    """Extract text content from an HTML file."""
+    try:
+        tree = lhtml.fromstring(path.read_bytes())
+        for element in tree.xpath("//script|//style"):
+            parent = element.getparent()
+            if parent is not None:
+                parent.remove(element)
+        text = (tree.text_content() or "").strip()
+        return text if text else None
+    except Exception:
+        return None
+
+
+def _process_file(path: Path) -> Optional[Tuple[str, str]]:
+    """Process a single file and extract text content."""
+    suffix = path.suffix.lower()
+
+    if suffix in SUPPORTED_TEXT_EXT:
+        text = _extract_text_content(path)
+        return (path.stem, text) if text else None
+    elif suffix in HTML_EXT:
+        text = _extract_html_content(path)
+        return (path.stem, text) if text else None
+
+    return None
+
+
+def _iter_seed_texts(input_path: Path) -> Iterable[Tuple[str, str]]:
+    """Iterate through seed texts from input path."""
+    if not input_path.is_dir():
+        raise ValueError(f"""Unsupported seed input: {input_path};
+                         Provide a directory of .txt, .md or .html files.""")
+
+    for path in sorted(input_path.rglob("*")):
+        if not path.is_file():
+            continue
+
+        result = _process_file(path)
+        if result:
+            yield result
 
 
 def _normalize_rows(x: np.ndarray) -> np.ndarray:
@@ -71,7 +92,7 @@ def build_seed_model(
     output_path.mkdir(parents=True, exist_ok=True)
 
     model_name = embedding_model_name or settings.EMBEDDING_MODEL
-    
+
     log = logger.bind(
         stage="build_seed",
         input=str(input_path),
@@ -159,6 +180,8 @@ def build_seed_model(
     )
     return output_path
 
-if __name__ == '__main__':
-    build_seed_model(seed_input="../../../data/seed_corpus/",
-                     )
+
+if __name__ == "__main__":
+    build_seed_model(
+        seed_input="../../../data/seed_corpus/",
+    )

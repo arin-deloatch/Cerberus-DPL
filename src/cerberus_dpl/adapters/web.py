@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from typing import Optional
+
 from urllib.parse import urljoin
 
 import httpx
@@ -122,7 +123,7 @@ class WebAdapter(Adapter):
             mime_type="text/html",
             lang=None,  # MVP: skip detection
             title=title,
-            text='text',
+            text="text",
             outlinks=[],
             backlinks=[],
             headings=[],  # keep minimal

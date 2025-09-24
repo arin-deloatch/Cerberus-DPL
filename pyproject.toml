@@ -6,12 +6,16 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 license = "Apache-2.0"
 dependencies = [
+    "bertopic>=0.17.3",
     "docling>=1.11.0",
+    "hdbscan>=0.8.33",
+    "httpx>=0.28.1",
     "pydantic>=2.11.7",
     "scikit-learn>=1.7.2",
     "sentence-transformers>=5.1.0",
     "structlog>=25.4.0",
     "typer>=0.17.4",
+    "umap-learn>=0.5.4",
 ]
 
 [project.scripts]

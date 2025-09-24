@@ -1,5 +1,5 @@
 """
-Adapters for inp
+Adapters for input
 """
 
 from .base import Adapter, AdapterError, NotFoundError, TransientError
