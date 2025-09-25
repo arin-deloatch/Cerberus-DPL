@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     USER_AGENT: str = "Ceberus-DPL/0.1"
     TIMEOUT_S: int = 20
 
-    SEED_MODEL_PATH: str = "data/seed_model"
+    SEED_MODEL_PATH: str = "artifacts/"
     SEED_N_CENTROIDS: int = 1
 
 

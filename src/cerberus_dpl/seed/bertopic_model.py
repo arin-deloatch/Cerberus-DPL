@@ -4,7 +4,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable, Tuple, Optional
 import json
+import shutil
 from lxml import html as lhtml
+from datetime import datetime, timezone
 
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
@@ -129,8 +131,45 @@ def create_bertopic_model(
     return topic_model
 
 
+def save_bertopic_model(
+    topic_model: BERTopic, output_path: Path, overwrite: bool = False
+) -> None:
+    """Save a trained BERTopic model and its topic information.
+
+    Args:
+        topic_model: The trained BERTopic model to save
+        output_path: Path where to save the model
+        overwrite: Whether to overwrite if the directory already exists
+    """
+    output_path = Path(output_path)
+
+    # Handle existing directory
+    if output_path.exists():
+        if not overwrite:
+            raise FileExistsError(f"Output path already exists: {output_path}. Use overwrite=True to replace it.")
+        if output_path.is_dir():
+            shutil.rmtree(output_path)
+        else:
+            output_path.unlink()
+
+    # Create the output directory
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    # Save the model (BERTopic saves as a file, not directory)
+    model_file_path = output_path / f"bertopic_model_{datetime.now(timezone.utc)}"
+    topic_model.save(str(model_file_path),serialization="safetensors", save_ctfidf=True)
+    logger.info(f"Model saved to: {model_file_path}")
+
+    # Save topic info
+    topic_info = topic_model.get_topic_info()
+    info_path = output_path / f"topic_info_{datetime.now(timezone.utc)}.json"
+    with open(info_path, "w") as f:
+        json.dump(topic_info.to_dict(), f, indent=2, default=str)
+    logger.info(f"Topic info saved to: {info_path}")
+
+
 def train_bertopic_model(
-    input_path: Path, output_path: Optional[Path] = None, **model_kwargs
+    input_path: Path, output_path: Optional[Path] = None, overwrite: bool = False, **model_kwargs
 ) -> BERTopic:
     """Train a BERTopic model on seed texts."""
 
@@ -158,16 +197,6 @@ def train_bertopic_model(
 
     # Save model if output path provided
     if output_path:
-        output_path = Path(output_path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        topic_model.save(str(output_path))
-        logger.info(f"Model saved to: {output_path}")
-
-        # Save topic info
-        topic_info = topic_model.get_topic_info()
-        info_path = output_path.parent / f"{output_path.stem}_topic_info.json"
-        with open(info_path, "w") as f:
-            json.dump(topic_info.to_dict(), f, indent=2, default=str)
-        logger.info(f"Topic info saved to: {info_path}")
+        save_bertopic_model(topic_model, output_path, overwrite=overwrite)
 
     return topic_model

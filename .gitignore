@@ -208,6 +208,8 @@ __marimo__/
 
 # Seed Data/Topic Modeling stuff:
 data/seed_model/
+data
 data/*
 *.npy
 *.bertopic/
+artifacts

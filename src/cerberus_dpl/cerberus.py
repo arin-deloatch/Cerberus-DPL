@@ -31,6 +31,12 @@ def build_seed(
         help="Minimum cluster size for HDBSCAN to build.",
     ),
     random_state: int = typer.Option(42, "--random-state", help="Clustering RNG seed"),
+    overwrite: bool = typer.Option(
+        False,
+        "--overwrite",
+        "-f",
+        help="Overwrite contents in SEED_MODEL_PATH directory if it already exists",
+    ),
 ):
     out = train_bertopic_model(
         input_path=input_path,
@@ -38,6 +44,7 @@ def build_seed(
         embedding_model_name=model,
         min_cluster_size=min_cluster_size,
         random_state=random_state,
+        overwrite=overwrite,
     )
     logger.info("cli_build_seed_done", output=str(out))
 
