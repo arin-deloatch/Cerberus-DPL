@@ -213,3 +213,6 @@ data/*
 *.npy
 *.bertopic/
 artifacts
+
+# Deprecated PoCs
+depr

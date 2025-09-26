@@ -146,7 +146,9 @@ def save_bertopic_model(
     # Handle existing directory
     if output_path.exists():
         if not overwrite:
-            raise FileExistsError(f"Output path already exists: {output_path}. Use overwrite=True to replace it.")
+            raise FileExistsError(
+                f"Output path already exists: {output_path}. Use overwrite=True to replace it."
+            )
         if output_path.is_dir():
             shutil.rmtree(output_path)
         else:
@@ -157,7 +159,9 @@ def save_bertopic_model(
 
     # Save the model (BERTopic saves as a file, not directory)
     model_file_path = output_path / f"bertopic_model_{datetime.now(timezone.utc)}"
-    topic_model.save(str(model_file_path),serialization="safetensors", save_ctfidf=True)
+    topic_model.save(
+        str(model_file_path), serialization="safetensors", save_ctfidf=True
+    )
     logger.info(f"Model saved to: {model_file_path}")
 
     # Save topic info
@@ -169,7 +173,10 @@ def save_bertopic_model(
 
 
 def train_bertopic_model(
-    input_path: Path, output_path: Optional[Path] = None, overwrite: bool = False, **model_kwargs
+    input_path: Path,
+    output_path: Optional[Path] = None,
+    overwrite: bool = False,
+    **model_kwargs,
 ) -> BERTopic:
     """Train a BERTopic model on seed texts."""
 
