@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.scripts]
-cerberus = "cerberus_dpl.cerberus:main"
+cerberus = "cerberus_dpl.cli:main"
 
 [dependency-groups]
 dev = [

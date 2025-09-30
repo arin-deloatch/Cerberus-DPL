@@ -1,12 +1,9 @@
 """BERTopic Model Creation"""
 
-from __future__ import annotations
-from pathlib import Path
-from typing import Iterable, Tuple, Optional
 import json
 import shutil
-from lxml import html as lhtml
-from datetime import datetime, timezone
+from typing import Optional
+from pathlib import Path
 
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
@@ -18,57 +15,7 @@ from bertopic import BERTopic
 from bertopic.representation import KeyBERTInspired
 from bertopic.vectorizers import ClassTfidfTransformer
 
-
-SUPPORTED_TEXT_EXT = {".txt", ".md", ".markdown"}
-HTML_EXT = {".html", ".htm"}
-
-
-def _extract_text_content(path: Path) -> Optional[str]:
-    """Extract text content from a text file."""
-    return path.read_text(encoding="utf-8", errors="ignore")
-
-
-def _extract_html_content(path: Path) -> Optional[str]:
-    """Extract text content from an HTML file."""
-    try:
-        tree = lhtml.fromstring(path.read_bytes())
-        for element in tree.xpath("//script|//style"):
-            parent = element.getparent()
-            if parent is not None:
-                parent.remove(element)
-        text = (tree.text_content() or "").strip()
-        return text if text else None
-    except Exception:
-        return None
-
-
-def _process_file(path: Path) -> Optional[Tuple[str, str]]:
-    """Process a single file and extract text content."""
-    suffix = path.suffix.lower()
-
-    if suffix in SUPPORTED_TEXT_EXT:
-        text = _extract_text_content(path)
-        return (path.stem, text) if text else None
-    elif suffix in HTML_EXT:
-        text = _extract_html_content(path)
-        return (path.stem, text) if text else None
-
-    return None
-
-
-def _iter_seed_texts(input_path: Path) -> Iterable[Tuple[str, str]]:
-    """Iterate through seed texts from input path."""
-    if not input_path.is_dir():
-        raise ValueError(f"""Unsupported seed input: {input_path};
-                         Provide a directory of .txt, .md or .html files.""")
-
-    for path in sorted(input_path.rglob("*")):
-        if not path.is_file():
-            continue
-
-        result = _process_file(path)
-        if result:
-            yield result
+from cerberus_dpl.utils.utils import _utc_now, _iter_seed_texts
 
 
 def create_bertopic_model(
@@ -158,7 +105,7 @@ def save_bertopic_model(
     output_path.mkdir(parents=True, exist_ok=True)
 
     # Save the model (BERTopic saves as a file, not directory)
-    model_file_path = output_path / f"bertopic_model_{datetime.now(timezone.utc)}"
+    model_file_path = output_path / f"bertopic_model_{_utc_now()}"
     topic_model.save(
         str(model_file_path), serialization="safetensors", save_ctfidf=True
     )
@@ -166,7 +113,7 @@ def save_bertopic_model(
 
     # Save topic info
     topic_info = topic_model.get_topic_info()
-    info_path = output_path / f"topic_info_{datetime.now(timezone.utc)}.json"
+    info_path = output_path / f"topic_info_{_utc_now()}.json"
     with open(info_path, "w") as f:
         json.dump(topic_info.to_dict(), f, indent=2, default=str)
     logger.info(f"Topic info saved to: {info_path}")
@@ -206,4 +153,20 @@ def train_bertopic_model(
     if output_path:
         save_bertopic_model(topic_model, output_path, overwrite=overwrite)
 
+    return topic_model
+
+
+def load_bertopic_model(model_path: Path) -> BERTopic:
+    """
+    Load a BERTopic model from a directory or file saved with `topic_model.save(...)`.
+    This will also restore the embedding model (often saved with safetensors).
+    """
+    if not model_path.exists():
+        logger.error(f"Model path not found: {model_path}")
+        raise FileNotFoundError
+
+    logger.info(f"Loaded topic model from: {model_path}")
+    topic_model = BERTopic.load(
+        str(model_path), embedding_model=settings.EMBEDDING_MODEL
+    )
     return topic_model

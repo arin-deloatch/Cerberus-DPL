@@ -10,47 +10,20 @@ Deliberately simple: HTML only, basic error handling, no language detection.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import Optional
-
-from urllib.parse import urljoin
-
 import httpx
 from lxml import html as lhtml
 
 from cerberus_dpl.models import NormalizedDoc
 from cerberus_dpl.config import settings
 from cerberus_dpl.logging import logger
+from cerberus_dpl.utils.utils import _utc_now, _strip_noise, _extract_outlinks
 from cerberus_dpl.adapters.base import (
     Adapter,
     AdapterError,
     NotFoundError,
     TransientError,
 )
-
-
-def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-def _strip_noise(tree: lhtml.HtmlElement) -> None:
-    # Remove script and style elements
-    for element in tree.xpath("//script | //style | //header | //nav | //footer"):
-        element.getparent().remove(element)
-
-
-def _extract_outlinks(tree: lhtml.HtmlElement, base_url: str) -> list[str]:
-    hrefs = tree.xpath("//a[@href]/@href")
-    out: list[str] = []
-    seen: set[str] = set()
-    for h in hrefs:
-        if not h or h.startswith(("#", "mailto:", "javascript:")):
-            continue
-        u = urljoin(base_url, h)
-        if u not in seen:
-            seen.add(u)
-            out.append(u)
-    return out
 
 
 class WebAdapter(Adapter):

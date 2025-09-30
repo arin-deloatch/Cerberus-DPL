@@ -8,6 +8,6 @@ Seed corpus preparation:
 
 """
 
-from .bertopic_model import train_bertopic_model
+from .bertopic_model import train_bertopic_model, load_bertopic_model
 
-__all__ = ["train_bertopic_model"]
+__all__ = ["train_bertopic_model", "load_bertopic_model"]

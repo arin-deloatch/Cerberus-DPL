@@ -1,12 +1,18 @@
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, Literal, List, Dict
+from typing import Optional, Literal, List, Dict, Union, Callable, Sequence
 from datetime import datetime
 
+# Type alias for adapters
 SourceType = Literal["web", "graphql", "database", "cli"]
+# Type alias for cluster level statistics
+Number = Union[int, float]
+# Type alias for token counter utility
+TokenCounter = Callable[[Sequence[str]], List[int]]
 
 
 class NormalizedDoc(BaseModel):
     """Contract for source data."""
+
     source_type: SourceType
     source_id: str
     timestamp: datetime
@@ -45,18 +51,18 @@ class TopicStats(BaseModel):
     model_config = ConfigDict(frozen=True)
     topic: int
     n_docs: int
-    mean_len: float
-    median_len: float
-    min_len: int
-    max_len: int
-    std_len: float
-    iqr: float
-    mad: float
+    mean_len: Number
+    median_len: Number
+    min_len: Number
+    max_len: Number
+    std_len: Number
+    iqr: Number
+    mad: Number
 
 
 class OverallSummary(BaseModel):
     """Top-level schema for serializing per-topic stats and metadata."""
 
-    schema: str = Field(default="bertopic_cluster_token_stats@v1")
+    schema_id: str = Field(default="bertopic_cluster_token_stats@v1")
     metadata: dict = Field(default_factory=dict)
     topics: List[TopicStats]
