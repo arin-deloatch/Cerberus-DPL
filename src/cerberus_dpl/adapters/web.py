@@ -17,7 +17,7 @@ from lxml import html as lhtml
 from cerberus_dpl.models import NormalizedDoc
 from cerberus_dpl.config import settings
 from cerberus_dpl.logging import logger
-from cerberus_dpl.utils.utils import _utc_now, _strip_noise, _extract_outlinks
+from cerberus_dpl.utils.utils import _utc_now, _strip_noise
 from cerberus_dpl.adapters.base import (
     Adapter,
     AdapterError,
@@ -84,7 +84,6 @@ class WebAdapter(Adapter):
         title_nodes = tree.xpath("//title/text()")
         title = (title_nodes[0].strip() if title_nodes else None) or None
         text = (tree.text_content() or "").strip()
-        outlinks = _extract_outlinks(tree, final_url)
 
         ndoc = NormalizedDoc(
             source_type="web",
@@ -94,14 +93,9 @@ class WebAdapter(Adapter):
             version_tag=resp.headers.get("etag"),
             license=None,
             mime_type="text/html",
-            lang=None,  # MVP: skip detection
+            lang=None,
             title=title,
-            text="text",
-            outlinks=[],
-            backlinks=[],
-            headings=[],  # keep minimal
-            code_blocks=0,
-            tables=0,
+            text=text,
             last_modified=None,  # MVP: omit; can parse later
             meta={
                 "http_status": str(status),
@@ -109,16 +103,16 @@ class WebAdapter(Adapter):
             },
         )
 
-        log.info(
-            "web_fetch_ok", status=status, text_len=len(text), outlinks=len(outlinks)
-        )
-        print(ndoc)
+        log.info("web_fetch_ok", status=status, text_len=len(text))
         return ndoc
 
 
 if __name__ == "__main__":
     web_adapter = WebAdapter()
 
-    web_adapter.fetch_and_normalize(
+    text = web_adapter.fetch_and_normalize(
         "https://www.redhat.com/en/blog/openshift-vision-and-execution"
     )
+
+    print(text.text)
+    print(text.title)
