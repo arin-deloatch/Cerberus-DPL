@@ -105,14 +105,3 @@ class WebAdapter(Adapter):
 
         log.info("web_fetch_ok", status=status, text_len=len(text))
         return ndoc
-
-
-if __name__ == "__main__":
-    web_adapter = WebAdapter()
-
-    text = web_adapter.fetch_and_normalize(
-        "https://www.redhat.com/en/blog/openshift-vision-and-execution"
-    )
-
-    print(text.text)
-    print(text.title)

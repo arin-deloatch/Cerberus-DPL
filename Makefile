@@ -1,5 +1,8 @@
-.PHONY: lint cerberus
+.PHONY: install lint cerberus
 
+install:
+	uv sync
+	
 lint:
 	uv run ruff check --fix 
 	uv run ruff format

@@ -1,0 +1,7 @@
+# Data Quality Gating Policy
+version: "0.0.1"
+name: "cerberus-data-quality-policy"
+updated_at: "2025-10-06"
+description: >
+  Weights and thresholds for document/cluster gating prior to RAG ingestion.
+

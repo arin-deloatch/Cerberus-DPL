@@ -141,7 +141,7 @@ def infer(
         "source": str(source),
         "topic": int(result["topic"]),
         "probability": float(result["probability"]),
-        "is_outlier": bool(result["is_outlier"]),
+        "rejected": bool(result["is_outlier"]),
         "token_count": int(result["token_count"]),
         "word_count": int(word_count),
         "text_length": int(result["text_length"]),

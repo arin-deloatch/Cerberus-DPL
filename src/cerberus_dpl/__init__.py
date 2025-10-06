@@ -18,6 +18,6 @@ __all__ = [
 try:
     __version__ = version("cerberus-dpl")
 except Exception:
-    __version__ = "0.0.0"
+    __version__ = "0.0.1"
 
 __author__ = "Arin DeLoatch"
